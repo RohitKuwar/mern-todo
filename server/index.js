@@ -7,12 +7,12 @@ const connectDB = require('./config/db');
 const app = express();
 
 const allowedOrigins = [
-  'http://localhost:8000',
-  'https://mern-todo-app-tau-liart.vercel.app/'  // frontend deployment URL
+  'http://localhost:3000',
+  'https://mern-todo-app-tau-liart.vercel.app'  // frontend deployment URL
 ];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: "*",
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true,
 }));
