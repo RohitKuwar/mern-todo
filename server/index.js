@@ -5,7 +5,18 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 
 const app = express();
-app.use(cors());
+
+const allowedOrigins = [
+  'http://localhost:8000',          // local dev
+  'https://mern-todo-t02q.onrender.com' // 👈 update this after frontend deploy
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  credentials: true,
+}));
+
 app.use(express.json());
 
 app.use('/api/todos', require('./routes/todos'));

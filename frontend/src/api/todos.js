@@ -3,7 +3,7 @@ import axios from "axios";
 // Base URL of your backend
 // If backend runs on localhost:8000, use that
 const API = axios.create({
-  baseURL: "http://localhost:8000/api/todos",
+  baseURL: "https://mern-todo-t02q.onrender.com/api/todos",
 });
 
 // Get all todos
