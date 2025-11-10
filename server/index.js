@@ -11,21 +11,41 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
   .map(s => s.trim())
   .filter(Boolean);
 
-// dynamic CORS middleware
-app.use(cors({
+const corsOptions = {
   origin: function(origin, callback) {
-    // allow requests with no origin (cURL, server-to-server)
+    // allow requests with no origin (curl, server-to-server)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
     }
-    return callback(new Error('CORS not allowed for origin: ' + origin));
+    return callback(new Error('Not allowed by CORS'));
   },
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false // set true only if you must send cookies and then don't use origin: "*"
-}));
-app.options('*', cors());
+  credentials: false
+};
+
+// Use CORS for all routes (applies response headers)
+app.use(cors(corsOptions));
+
+// Explicitly handle preflight (OPTIONS) requests
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    // If origin is allowed, echo it back; otherwise block
+    const origin = req.header('Origin');
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      res.header('Access-Control-Allow-Origin', origin || '*');
+      res.header('Access-Control-Allow-Methods', corsOptions.methods.join(','));
+      res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(','));
+      // if you use credentials, also return:
+      // res.header('Access-Control-Allow-Credentials', 'true');
+      return res.sendStatus(200);
+    } else {
+      return res.status(403).json({ message: 'CORS blocked' });
+    }
+  }
+  next();
+});
 
 app.use(express.json());
 
