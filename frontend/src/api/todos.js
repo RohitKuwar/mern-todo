@@ -2,8 +2,15 @@ import axios from "axios";
 
 // Base URL of your backend
 // If backend runs on localhost:8000, use that
+const BASE = process.env.REACT_APP_API_URL || "http://localhost:8000";
+
+// Build final baseURL like: https://your-backend.onrender.com/api/todos
+const baseURL = BASE.replace(/\/$/, "") + "/api/todos";
+
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL,
+  // if you use credentials/cookies set withCredentials:true and configure server accordingly
+  // withCredentials: true
 });
 
 // Get all todos
