@@ -8,6 +8,7 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:3000',
+  'https://mern-todo-app-tau-liart.vercel.app/',
   'https://mern-todo-6acsfy5wy-rohitkuwars-projects.vercel.app'  // frontend deployment URL
 ];
 
