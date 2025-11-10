@@ -5,28 +5,19 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 
 const app = express();
-app.use(express.json());
 
-const allowedOrigin = [
+const allowedOrigins = [
   'http://localhost:8000',
-  'https://mern-todo-t02q.onrender.com'
+  'https://mern-todo-app-tau-liart.vercel.app/'  // frontend deployment URL
 ];
 
-// Allow only known origins from env (fallback to allow all in dev)
-if (process.env.NODE_ENV === 'production') {
-  const allowed = allowedOrigin.map(s => s.trim()).filter(Boolean);
-  app.use(cors({
-    origin: function(origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowed.includes(origin)) return callback(null, true);
-      callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true
-  }));
-} else {
-  app.use(cors()); // dev: allow all
-}
-app.options('', cors());
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  credentials: true,
+}));
+
+app.use(express.json());
 
 app.use('/api/todos', require('./routes/todos'));
 
