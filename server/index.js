@@ -8,11 +8,11 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://mern-todo-app-tau-liart.vercel.app'  // frontend deployment URL
+  'https://mern-todo-6acsfy5wy-rohitkuwars-projects.vercel.app'  // frontend deployment URL
 ];
 
 app.use(cors({
-  origin: "*",
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true,
 }));
