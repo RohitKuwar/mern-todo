@@ -15,7 +15,7 @@ const allowedOrigins = [
 app.use(cors({
   origin: "*",
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  credentials: true,
+  credentials: false,
 }));
 
 app.use(express.json());
@@ -25,7 +25,6 @@ app.use('/api/todos', require('./routes/todos'));
 connectDB();
 
 const PORT = process.env.PORT || 8080;
-
 
 app.listen(PORT, () => {
     console.log('🚀 server running on port', PORT);

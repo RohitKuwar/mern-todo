@@ -3,7 +3,7 @@ import axios from "axios";
 // Base URL of your backend
 // If backend runs on localhost:8000, use that
 const API = axios.create({
-  baseURL: process.env.API_URL,
+  baseURL: process.env.REACT_APP_API_URL,
 });
 
 // Get all todos
