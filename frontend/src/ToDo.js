@@ -1,95 +1,154 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
+import {
+  getTodos,
+  createTodo,
+  patchTodo,
+  deleteTodo,
+  clearAllTodos,
+} from "./api/todos";
+import "./App.css";
 
 function ToDo() {
-    const [todoList, setTodoList] = useState([]);
-    const [task, setTask] = useState('');
-    const [checked, setChecked] = useState(false);
+  const [task, setTask] = useState("");
+  const [todos, setTodos] = useState([]);
+  const [editTodoId, setEditTodoId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-    useEffect(() => {
+  // Load todos from backend
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
+  const fetchTodos = async () => {
+    try {
+      setLoading(true);
+      const res = await getTodos();
+      setTodos(res.data);
+      setError("");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load todos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdd = async () => {
+    if (!task.trim()) return;
+    try {
+      if (editTodoId) {
+        await patchTodo(editTodoId, { title: task });
+      } else {
+        await createTodo(task);
+      }
+      setTask("");
+      setEditTodoId(null);
       fetchTodos();
-    }, []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to add/update todo");
+    }
+  };
 
-    const fetchTodos = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/todos');
-        const data = await response.json();
-        setTodoList(data);
-        } catch (error) {
-        console.error('Error fetching todos:', error);
-      }
-    };
+  const handleDelete = async (id) => {
+    try {
+      await deleteTodo(id);
+      fetchTodos();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to delete todo");
+    }
+  };
 
-    const addTodo = async (title) => {
-        if (!task.trim()) return;
-      try {
-        const response = await fetch('http://localhost:8000/api/todos', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ title }),
-        });
-        const newTodo = await response.json();
-        setTodoList([...todoList, newTodo]);
-        setTask('');
-      } catch (error) {
-        console.error('Error adding todo:', error);
-      }
-    };
+  const handleToggle = async (id, currentStatus) => {
+    try {
+      await patchTodo(id, { completed: !currentStatus });
+      fetchTodos();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to update todo");
+    }
+  };
 
-    const deleteTodo = async (id) => {
-      try {
-        await fetch(`http://localhost:8000/api/todos/${id}`, {
-            method: 'DELETE',
-        });
-        setTodoList(todoList.filter(todo => todo._id !== id));
-      } catch (error) {
-        console.error('Error deleting todo:', error);
-      }
-    };
+  const handleEdit = (todo) => {
+    setTask(todo.title);
+    setEditTodoId(todo._id);
+  };
 
-    const updateTodo = async (id, completed) => {
-      try {
-        const response = await fetch(`http://localhost:8000/api/todos/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ completed }),
-        });
-        const updatedTodo = await response.json();
-        setTodoList(todoList.map(todo => (todo._id === id ? updatedTodo : todo)));
-      } catch (error) {
-        console.error('Error updating todo:', error);
-      }
-    };
-
+  const handleClearAll = async () => {
+    try {
+      await clearAllTodos();
+      fetchTodos();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to clear todos");
+    }
+  };
 
   return (
-    <div>
-        <h1>ToDo List</h1>
-        <div className='todo-container'>
-            <input type="text" name="task" id="task" value={task} onChange={e => setTask(e.target.value)} />
-            <button onClick={() => addTodo(task)}>Add</button>
-        </div>
-        <div>
-            {todoList.map((todo, index) => (
-                <div key={todo._id} className="todo-item">
-                    <input type="checkbox" name="todo-check" id="todo-check" checked={todo.completed} onChange={(e) => {
-                        const updatedList = todoList.map(item => item._id === todo._id ? { ...item, completed: e.target.checked } : item);
-                        setTodoList(updatedList);
-                    }} />
-                    <span>{todo.title}</span>
-                    <button onClick={() => {
-                        console.log(checked);
-                        updateTodo(todo._id, !todo.completed)
-                    }}>Update</button>
-                    <button onClick={() => deleteTodo(todo._id)}>Delete</button>
-                </div>
-            ))}
-        </div>
+    <div className="container">
+      <h1 className="heading">📝 To-Do List</h1>
+
+      <div className="input-row">
+        <input
+          type="text"
+          placeholder="Enter a task..."
+          value={task}
+          onChange={(e) => setTask(e.target.value)}
+          className="input"
+        />
+        <button onClick={handleAdd} className="add-btn">
+          {editTodoId ? "Update" : "Add"}
+        </button>
+      </div>
+
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {todos.length > 0 && (
+        <button onClick={handleClearAll} className="clear-btn">
+          Clear All
+        </button>
+      )}
+
+      <ul className="list">
+        {todos.map((todo) => (
+          <li
+            key={todo._id}
+            className="list-item"
+            style={{
+              textDecoration: todo.completed ? "line-through" : "none",
+            }}
+          >
+            <span>{todo.title}</span>
+            <div>
+              <button
+                onClick={() => handleToggle(todo._id, todo.completed)}
+                className="action-btn"
+              >
+                {todo.completed ? "Undo" : "Done"}
+              </button>
+              <button
+                onClick={() => handleEdit(todo)}
+                className="action-btn"
+                style={{ background: "#facc15" }}
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(todo._id)}
+                className="action-btn"
+                style={{ background: "#ef4444", color: "#fff" }}
+              >
+                Delete
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
-  )
+  );
 }
 
-export default ToDo
+export default ToDo;
