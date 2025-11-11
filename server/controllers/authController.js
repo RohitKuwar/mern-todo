@@ -41,8 +41,10 @@ const login = async (req, res) => {
     }
 
     // create tokens
-    const accessToken = await signAccessToken(user._id);
-    const refreshToken = await signRefreshToken(user._id);
+    const jti = Math.random(); // unique identifier for the refresh token
+    const userIdStr = String(user._id); // ensures this is a plain string
+    const accessToken = signAccessToken({ userId: userIdStr });
+    const refreshToken = signRefreshToken({ userId: userIdStr }, jti);
 
     // store refresh token in DB
     user.refreshTokens.push({ token: refreshToken });
