@@ -6,7 +6,7 @@ const connectDB = require('./config/db');
 
 const app = express();
 
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
+const allowedOrigins = (process.env.ALLOWED_ORIGINS)
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
@@ -22,7 +22,7 @@ const corsOptions = {
   },
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false
+  credentials: true
 };
 
 // Use CORS for all routes (applies response headers)
